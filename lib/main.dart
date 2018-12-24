@@ -1,110 +1,120 @@
-import 'package:english_words/english_words.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_example_app/tabs/first.dart';
+import 'package:flutter_example_app/tabs/second.dart';
+import 'package:flutter_example_app/tabs/third.dart';
 
-void main() => runApp(MyApp());
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Example App',
-      theme: new ThemeData(
-        primaryColor: Color(0xFF3f51b5),
-      ),
-      home: RandomWords(),
+// flutter pub get
+// flutter pub pub run intl_translation:extract_to_arb --output-dir=lib/l10n lib/main.dart
+// flutter pub pub run intl_translation:generate_from_arb --output-dir=lib/l10n --no-use-deferred-loading lib/main.dart lib/l10n/intl_*.arb
+import 'l10n/messages_all.dart';
+
+class DemoLocalizations {
+  static Future<DemoLocalizations> load(Locale locale) {
+    final String name = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
+    final String localeName = Intl.canonicalizedLocale(name);
+
+    return initializeMessages(localeName).then((_) {
+      Intl.defaultLocale = localeName;
+      return DemoLocalizations();
+    });
+  }
+
+  static DemoLocalizations of(BuildContext context) {
+    return Localizations.of<DemoLocalizations>(context, DemoLocalizations);
+  }
+
+  String get title {
+    return Intl.message(
+      'Hello World',
+      name: 'title',
+      desc: 'Title for the Demo application',
     );
   }
 }
 
-class RandomWords extends StatefulWidget {
+class DemoLocalizationsDelegate extends LocalizationsDelegate<DemoLocalizations> {
+  const DemoLocalizationsDelegate();
+
   @override
-  RandomWordsState createState() => new RandomWordsState();
+  bool isSupported(Locale locale) => ['en', 'es'].contains(locale.languageCode);
+
+  @override
+  Future<DemoLocalizations> load(Locale locale) => DemoLocalizations.load(locale);
+
+  @override
+  bool shouldReload(DemoLocalizationsDelegate old) => false;
 }
 
-class RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final Set<WordPair> _saved = new Set<WordPair>();
-  final _biggerFont = const TextStyle(fontSize: 18.0);
+void main() {
+  runApp(new MaterialApp(
+      title: "Using Tabs",
+      home: new MyHome(),
+      onGenerateTitle: (BuildContext context) => DemoLocalizations.of(context).title,
+      localizationsDelegates: [
+        const DemoLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('en', ''),
+        const Locale('es', ''),
+      ]));
+}
+
+class MyHome extends StatefulWidget {
+  @override
+  MyHomeState createState() => new MyHomeState();
+}
+
+class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
+  TabController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = new TabController(length: 3, initialIndex: 1, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter Example App'),
-        actions: <Widget>[
-          new IconButton(key: Key('icon-menu'), icon: const Icon(Icons.list), onPressed: _pushSaved),
-        ],
+    return new Scaffold(
+      appBar: new AppBar(
+        title: Text(DemoLocalizations.of(context).title),
+        backgroundColor: Color(0xFF3f51b5),
       ),
-      body: _buildSuggestions(),
-    );
-  }
-
-  void _pushSaved() {
-    Navigator.of(context).push(
-      new MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          final Iterable<ListTile> tiles = _saved.map(
-            (WordPair pair) {
-              return new ListTile(
-                title: new Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final List<Widget> divided = ListTile.divideTiles(
-            context: context,
-            tiles: tiles,
-          ).toList();
-
-          return new Scaffold(
-            key: Key('eeeeee'),
-            appBar: new AppBar(
-              title: const Text('Saved Suggestions'),
-            ),
-            body: new ListView(children: divided),
-          );
-        },
+      body: new TabBarView(
+        children: <Widget>[new FirstTab(), new SecondTab(), new ThirdTab()],
+        controller: controller,
       ),
-    );
-  }
-
-  Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-          if (i.isOdd) return Divider();
-
-          final index = i ~/ 2;
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10));
-          }
-          return _buildRow(_suggestions[index]);
-        });
-  }
-
-  Widget _buildRow(WordPair pair) {
-    final bool alreadySaved = _saved.contains(pair);
-
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
+      bottomNavigationBar: new Material(
+        color: new Color(0xFF3f51b5),
+        child: new TabBar(
+            tabs: <Tab>[
+              new Tab(
+                icon: new Icon(Icons.search),
+              ),
+              new Tab(
+                icon: new Icon(Icons.favorite),
+              ),
+              new Tab(
+                icon: new Icon(Icons.view_list),
+              ),
+            ],
+            controller: controller,
+            indicator: UnderlineTabIndicator(borderSide: BorderSide(width: 0)),
+            labelPadding: EdgeInsets.only(bottom: 16.0)),
       ),
-      trailing: new Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
-        });
-      },
     );
   }
 }
