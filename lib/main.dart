@@ -19,6 +19,7 @@ void main() {
       ],
       onGenerateTitle: (BuildContext context) =>
           AppLocalizations.of(context).title,
+      theme: ThemeData(fontFamily: 'Roboto'),
       home: new MyHome()));
 }
 

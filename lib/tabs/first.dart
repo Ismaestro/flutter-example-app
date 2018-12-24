@@ -18,7 +18,10 @@ class FirstTab extends StatelessWidget {
               ),
               new Text(
                 "First Tab",
-                style: new TextStyle(color: Colors.white),
+                style: new TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w300, // light
+                    fontStyle: FontStyle.italic),
               )
             ],
           ),
