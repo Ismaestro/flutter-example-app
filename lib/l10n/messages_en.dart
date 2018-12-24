@@ -20,6 +20,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
-    "title" : MessageLookupByLibrary.simpleMessage("Hello World")
+    "title" : MessageLookupByLibrary.simpleMessage("Flutter Example App")
   };
 }

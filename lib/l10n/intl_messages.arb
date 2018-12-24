@@ -1,8 +1,8 @@
 {
-  "@@last_modified": "2018-12-23T16:50:41.793438",
-  "title": "Hello World",
+  "@@last_modified": "2018-12-24T15:42:37.298140",
+  "title": "Flutter Example App",
   "@title": {
-    "description": "Title for the Demo application",
+    "description": "The application title",
     "type": "text",
     "placeholders": {}
   }

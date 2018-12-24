@@ -1,7 +1,9 @@
 {
-  "title": "Hola Mundo",
+  "@@locale": "es",
+  "@@last_modified": "2018-11-03T15:02:36.546976",
+  "title": "Flutter Ejemplo de App",
   "@title": {
-    "description": "Title for the Demo application",
-    "type": "text"
+    "type": "text",
+    "placeholders": {}
   }
 }

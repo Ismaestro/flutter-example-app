@@ -1,69 +1,25 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_example_app/tabs/first.dart';
 import 'package:flutter_example_app/tabs/second.dart';
 import 'package:flutter_example_app/tabs/third.dart';
-
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
 
-// flutter pub get
-// flutter pub pub run intl_translation:extract_to_arb --output-dir=lib/l10n lib/main.dart
-// flutter pub pub run intl_translation:generate_from_arb --output-dir=lib/l10n --no-use-deferred-loading lib/main.dart lib/l10n/intl_*.arb
-import 'l10n/messages_all.dart';
-
-class DemoLocalizations {
-  static Future<DemoLocalizations> load(Locale locale) {
-    final String name = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
-    final String localeName = Intl.canonicalizedLocale(name);
-
-    return initializeMessages(localeName).then((_) {
-      Intl.defaultLocale = localeName;
-      return DemoLocalizations();
-    });
-  }
-
-  static DemoLocalizations of(BuildContext context) {
-    return Localizations.of<DemoLocalizations>(context, DemoLocalizations);
-  }
-
-  String get title {
-    return Intl.message(
-      'Hello World',
-      name: 'title',
-      desc: 'Title for the Demo application',
-    );
-  }
-}
-
-class DemoLocalizationsDelegate extends LocalizationsDelegate<DemoLocalizations> {
-  const DemoLocalizationsDelegate();
-
-  @override
-  bool isSupported(Locale locale) => ['en', 'es'].contains(locale.languageCode);
-
-  @override
-  Future<DemoLocalizations> load(Locale locale) => DemoLocalizations.load(locale);
-
-  @override
-  bool shouldReload(DemoLocalizationsDelegate old) => false;
-}
+import 'localizations.dart';
 
 void main() {
   runApp(new MaterialApp(
-      title: "Using Tabs",
-      home: new MyHome(),
-      onGenerateTitle: (BuildContext context) => DemoLocalizations.of(context).title,
       localizationsDelegates: [
-        const DemoLocalizationsDelegate(),
+        AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate
       ],
       supportedLocales: [
-        const Locale('en', ''),
-        const Locale('es', ''),
-      ]));
+        Locale("en"),
+        Locale("es")
+      ],
+      onGenerateTitle: (BuildContext context) =>
+          AppLocalizations.of(context).title,
+      home: new MyHome()));
 }
 
 class MyHome extends StatefulWidget {
@@ -90,7 +46,7 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: Text(DemoLocalizations.of(context).title),
+        title: Text(AppLocalizations.of(context).title),
         backgroundColor: Color(0xFF3f51b5),
       ),
       body: new TabBarView(
