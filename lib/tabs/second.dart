@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SecondTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      backgroundColor: Colors.green,
-      body: new Container(
-        child: new Center(
-          child: new Column(
-            // center the children
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new Icon(
-                Icons.adb,
-                size: 160.0,
-                color: Colors.white,
-              ),
-              new Text(
-                "Second Tab",
-                style: new TextStyle(color: Colors.white),
-              )
-            ],
-          ),
-        ),
-      ),
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance
+          .collection('heroes')
+          .orderBy('likes', descending: true)
+          .limit(4)
+          .snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return new Text('Loading...');
+          default:
+            return new ListView(
+              children:
+                  snapshot.data.documents.map((DocumentSnapshot document) {
+                return new ListTile(
+                  title: new Text(document['name']),
+                  subtitle: new Text(document['likes'].toString()),
+                );
+              }).toList(),
+            );
+        }
+      },
     );
   }
 }
